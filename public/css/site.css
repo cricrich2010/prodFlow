@@ -1,0 +1,23 @@
+div {
+    border: 2px solid black;
+    padding-left: 2px;
+    padding-right: 2px;
+    /*display: flex;*/
+    /*width : 80%;*/
+    /*text-align: center;*/
+}
+
+#NewLine {
+    /*border: 2px solid black;*/
+    text-align: center;
+    display: flex;
+}
+
+#loginForm{
+    display: block;
+    border: 2px solid black
+}
+.PWconfirm{
+visibility: hidden;
+
+}

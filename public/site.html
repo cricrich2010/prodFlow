@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="css/site.css"/>
+</head>
+<body>
+    <p id="loginInput">Login</p>
+    
+    <div id="loginForm">
+
+        <form>
+            <fieldset id="LoginOperation" >
+                <legend>Select account operation:</legend>
+                <div style="display:flex">
+                    <div>
+                    <input type="radio" id="RB_login" name="RB_login" value="/login"
+                            checked>
+                    <label for="RB_login">Login</label>
+                    </div>
+                
+                    <div>
+                    <input type="radio" id="RB_ChPass" name="RB_login" value="/new_passwd">
+                    <label for="RB_ChPass">Change password</label>
+                    </div>
+                
+                    <div>
+                    <input type="radio" id="New_User" name="RB_login" value="/new_user">
+                    <label for="New_User">New user</label>
+                    </div>
+                </div>
+            </fieldset></br>
+            <label for="tb_userID">Provide your user ID</label></br>
+            <input type="text" id="tb_userID" name="tb_userID"></br>
+            <label for="tb_passwd">Provide your password</label></br>
+            <input type="password" id="tb_passwd" name="tb_passwd"></br>
+            <label class='PWconfirm' for="tb_PWconfirm">Confirm your password</label></br>
+            <input class='PWconfirm' type="password" id="tb_PWconfirm" name="tb_PWconfirm"></br>        
+            <button  id="BT_login_send" name="BT_login_send">Send</button>
+            
+        </form>
+    </div>
+    <h1>Site info</h1>
+    <div style="display:flex">
+    
+        <div>
+        <label class="siteliste" for="CB_SiteList">Select a site</label>
+        <select id="CB_SiteList" name="CB_SiteList"></select>
+        </div>
+        <div >
+            <p>
+            Country: <span id="Site_Country"></span></br>
+            City: <span id="Site_City"></span></br>
+            Street: <span id="Site_Street"></span></br>
+            Size: <span id="Site_Size"></span></p>
+        </div>
+
+    </div></br></br>
+    <div id="sitelineinfo"><table id="sitelinetable" class="Sitetable"></table></div>
+</br>
+        <span>Add new production line</span>
+        <div id="NewLine">
+            <div>
+                <label for="TB_lineID">Production line prefix</label></br>
+                <p><span id="Line_site_header" name=""></span></p>
+            </div>
+            <div>
+                <label for="TB_lineID">Production line site ID</label></br>
+                <input type="text" id="TB_lineID" name="TB_lineID">
+            </div>
+            <div>
+                <label for="TB_Volume">Production line site ID</label></br>
+                <input type="number" id="TB_Volume" name="TB_Volume" value="0">
+            </div>
+            <div>
+                <button  id="BT_ADDline" name="ADD" >ADD</button>
+            </div>
+        </div>
+
+    <div id="LineIncidents"><table id="LigneIncidentsTable" class="Sitetable"></table></div>
+
+
+</body>
+<script src="/js/site.js"></script>
+
+</html>
