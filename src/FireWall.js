@@ -4,7 +4,8 @@ const RestrictedUrl= [
     '/restrected2',
     '/restrected3',
     '/new_passwd',
-    '/site/incidents'
+    '/site/incidents',
+    'NEw_Fake'
 
 ]
 
