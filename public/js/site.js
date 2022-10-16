@@ -136,7 +136,7 @@ function LoginOperation() {
         }
     }
 }
-function LoginSend(){
+function LoginSendCC(){
 
     let qPath = document.getElementByName('RB_login').value
     let tb_userID = document.getElementByid('tb_userID').value
@@ -165,13 +165,46 @@ function LoginSend(){
         })
 }
 
+function New_prodLines(){
+
+    let Site = document.getElementByName('CB_SiteList').value
+    let NoLigne = document.getElementByid('Line_site_header').value + document.getElementByid('TB_lineID').value
+    let Volume = document.getElementByid('TB_Volume').value
+
+    
+    let qoptions = 
+    {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: "POST",
+        body: JSON.stringify({ 'Site': Site, 'NoLigne': NoLigne, 'Volume': Number(Volume) })
+    }
+    fetch('/New_Line', qoptions) 
+    .then((response) => {
+        if (!response.ok){
+            alert(response.statusText )
+        }else{
+            response.json()
+        }})
+    .then((data) => {
+        console.log(data);
+        
+        this.AuthToken = data.AuthToken
+        })
+
+
+}
 
 
 
 
 document.getElementById('loginInput').addEventListener('click', DisplayLoginform);
 document.getElementById('LoginOperation').addEventListener('click', LoginOperation);
-document.getElementById('BT_login_send').addEventListener('click', LoginSend);
+document.getElementById('BT_login_send').addEventListener('click', LoginSendCC);
+document.getElementById('BT_ADDline').addEventListener('click', New_prodLines);
+
 // document.getElementById('RB_ChPass').addEventListener('click',RB_ChPass);
  //document.getElementById('New_User').addEventListener('click',New_User);
 
