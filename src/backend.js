@@ -48,7 +48,7 @@ app.get('/site/list',(req, res) => {
 app.get('/site/info',(req, res) => {
     //return detail info of site
     console.log("receive get: site/info for ", req.query.Site)
-    cnxSql.cnxSql.query("select * from ? where Site = ?; ",['Addresses', req.query.Site], (err, data) => {
+    cnxSql.cnxSql.query("select * from addresses where Site = ?; ",[req.query.Site], (err, data) => {
         if (err){
             console.log("err site-list query",err);
             res.status(500);
@@ -58,7 +58,7 @@ app.get('/site/info',(req, res) => {
     });
 });
 
-pp.get('/site/info_lines',(req, res) => {
+app.get('/site/info_lines',(req, res) => {
      //return lines info of site
     console.log("receive get: site/info", req.query.Site)
     cnxSql.cnxSql.query("select * from ProdLignes where Site = ?; ",[req.query.Site],(err, data) => {

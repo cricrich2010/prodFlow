@@ -28,10 +28,12 @@ function Fetch_Site_Info() {
         .then((resp) => { console.log(resp); return resp.json() })
         .then((data) => {
             console.log(data);
-            document.getElementById('Site_Country').innerText = data[0]['Coutry'];
+            document.getElementById('Site_Country').innerText = data[0]['Country'];
             document.getElementById('Site_City').innerText = data[0]['City'];
-            document.getElementById('Site_Street').innerText = data[0]['CStreet'];
+            document.getElementById('Site_Street').innerText = data[0]['Street'];
             document.getElementById('Site_Size').innerText = "not yet available";
+            document.getElementById('Line_site_header').innerText = data[0]['City'];
+
 
         });
 }
@@ -138,10 +140,19 @@ function LoginOperation() {
 }
 function LoginSendCC(){
 
-    let qPath = document.getElementByName('RB_login').value
-    let tb_userID = document.getElementByid('tb_userID').value
-    let tb_passwd = document.getElementByid('tb_passwd').value
+    //let qPath = document.getElementByName('RB_login').value
     
+    //let RB_Login = document.getElementsByName('RB_login')
+    let RB_Login = Array.from(document.getElementsByName('RB_login')).find((radio) => radio.checked).value;
+    
+    console.log(RB_Login)
+    console.log(document.getElementById('tb_userID').value)
+    console.log(document.getElementById('tb_passwd').value)
+
+    let qPath = RB_Login
+    let tb_userID = document.getElementById('tb_userID').value
+    let tb_passwd = document.getElementById('tb_passwd').value
+    if (! RB_Login){return;}
     let qoptions = 
     {
         headers: {
@@ -166,10 +177,9 @@ function LoginSendCC(){
 }
 
 function New_prodLines(){
-
-    let Site = document.getElementByName('CB_SiteList').value
-    let NoLigne = document.getElementByid('Line_site_header').value + document.getElementByid('TB_lineID').value
-    let Volume = document.getElementByid('TB_Volume').value
+    let Site = document.getElementById('CB_SiteList');
+    let NoLigne = document.getElementById('Line_site_header').value + document.getElementById('TB_lineID').value
+    let Volume = document.getElementById('TB_Volume').value
 
     
     let qoptions = 
