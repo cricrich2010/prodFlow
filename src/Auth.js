@@ -94,12 +94,12 @@ async function user_Login(req, res){
     console.log('UserAuth[0].Auth', UserAuth[0].Auth)
 
     // user dosn't exist
-    if (UserAuth.length = 0){
+    if (UserAuth.length == 0){
       res.status(403).send('Authentication failled: missing login and/or password');
       return;}
     // empty key is always valid -->> this is a student project !!!!
-    
-    if (UserAuth[0].Auth === "" || UserAuth[0].Auth === null){
+    console.log('UserAuth[0].Auth', UserAuth[0].Auth)
+    if (UserAuth[0].Auth=== "" || UserAuth[0].Auth === null){
       // generate and return token
       let UserUuid = uuid.uuidv1().toString('hex')
       res.status(200).json({'AuthToken':UserUuid});

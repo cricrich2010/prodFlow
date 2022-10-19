@@ -1,3 +1,4 @@
+
 let AuthToken= ""
 
 fetch('/site/list').then((resp) => { console.log(resp); return resp.json() })
@@ -33,6 +34,13 @@ function Fetch_Site_Info() {
             document.getElementById('Site_Street').innerText = data[0]['Street'];
             document.getElementById('Site_Size').innerText = "not yet available";
             document.getElementById('Line_site_header').innerText = data[0]['City'];
+            document.getElementById('TheImage').remove()
+            let TheImage = document.createElement('img')
+            TheImage.src = "https://picsum.photos/200/300?random=" + 
+            (Math.floor(Math.random() * (20 - 1) + 1 ))
+            TheImage.id = "TheImage"
+            document.getElementById('imgsite').appendChild(TheImage)
+
 
 
         });

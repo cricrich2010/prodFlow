@@ -2,7 +2,7 @@ const express = require('express');
 //const my = require('mysql2');
 //const uuid = require('uuid');
 const app = express();
-const port = 3000;
+const port = 3010;
 const Auth = require('./Auth.js');
 const FWll = require('./FireWall.js');
 console.log('load dbutil')
