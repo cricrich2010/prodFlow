@@ -6,18 +6,17 @@ const port = 3010;
 const Auth = require('./Auth.js');
 const FWll = require('./FireWall.js');
 console.log('load dbutil')
-const cnxSql = require('./dbutil.js');
+const {cnxSql, cnxSqp, mypool} = require('./dbutil.js');
 
-
+//console log the querie sreceived by the server
 function queryInLog(req, res, next){
-    console.log('middleware new req', req.headers.url)
+    console.log('middleware new req::', 'url:',req.url, 'body:', req.body)
     ;next()
 }
 
 //middlewares
-let jsonMiddle = express.json()
 app.use(express.static('./public'));
-app.use(jsonMiddle);
+app.use(express.json());
 app.use(queryInLog);
 app.use(Auth.user_Auth);
 app.use(FWll.firewall);
@@ -35,7 +34,7 @@ app.get('/', (req, res) => {
 app.get('/site/list',(req, res) => {
     //returne liste of sites
     console.log("receive get: site/list")
-    cnxSql.cnxSql.query("select * from Sites; ",(err, data) => {
+    cnxSql.query("select * from Sites; ",(err, data) => {
         if (err){
             console.log("err site-list query",err);
             res.status(500);
@@ -48,7 +47,7 @@ app.get('/site/list',(req, res) => {
 app.get('/site/info',(req, res) => {
     //return detail info of site
     console.log("receive get: site/info for ", req.query.Site)
-    cnxSql.cnxSql.query("select * from addresses where Site = ?; ",[req.query.Site], (err, data) => {
+    cnxSql.query("select * from addresses where Site = ?; ",[req.query.Site], (err, data) => {
         if (err){
             console.log("err site-list query",err);
             res.status(500);
@@ -58,10 +57,10 @@ app.get('/site/info',(req, res) => {
     });
 });
 
-app.get('/site/info_lines',(req, res) => {
+app.get('/site/info_lignes',(req, res) => {
      //return lines info of site
     console.log("receive get: site/info", req.query.Site)
-    cnxSql.cnxSql.query("select * from ProdLignes where Site = ?; ",[req.query.Site],(err, data) => {
+    cnxSql.query("select * from ProdLignes where Site = ?; ",[req.query.Site],(err, data) => {
         if (err){
             console.log("err site-info query",err);
             res.status(500);
@@ -74,7 +73,7 @@ app.get('/site/info_lines',(req, res) => {
 app.get('/site/incidents',(req, res) => {
      //return incident of site
     console.log("receive get: site/incidents", req.query.Site)
-    cnxSql.cnxSql.query("select * from Incidents join ProdLignes on Incidents.NoLigne = ProdLignes.NoLigne where Site = ?; ",[req.query.Site],(err, data) => {
+    cnxSql.query("select * from Incidents join ProdLignes on Incidents.NoLigne = ProdLignes.NoLigne where Site = ?; ",[req.query.Site],(err, data) => {
         if (err){console.log("err site-incidents query",err);
             res.status(500);
             res.send(err)}
@@ -95,49 +94,71 @@ app.post('/post-example', (req, res) => {
 app.post('/login', Auth.user_Login)
 app.post('/new_user', Auth.New_User)
 app.post('/new_passwd', Auth.New_Passwd)
-
-app.post('/New_Line', New_Prod_Line)
+app.post('/new_line', New_Prod_Line)
 
 console.log(process.env.SQL_CNX)
 
 function prodLine_consistency (req, res){
     //check query fields
-    if (!(req.body.get('FirstName') && req.body.get('Auth') && req.body.get('Volume'))){
-      res.status(503).send('inconsistent request received');
+    if (!('Site' in req.body && 'NoLigne' in req.body && 'Volume'in req.body )){
+      res.status(400).statusMessage('inconsistent fields request received').end();
       return false;}
     // check empty iser
-    if (req.body.get('Site') == "" || req.body.get('NoLine') == "" || req.body.get('Volume') == "" ){
-      res.status(503).send('inconsistent request received');
+
+    console.log(typeof(req.body['Site']), req.body['Site'])
+    console.log(typeof(req.body['NoLigne']),req.body['NoLigne'])
+    console.log(typeof(req.body['Volume']),req.body['Volume'])
+
+
+    if (req.body['Site'] == "" || req.body['NoLigne'] == "" || ! typeof(req.body['Volume']) === "number" ){
+      res.status(400).statusMessage('inconsistent data request received').end();
       return false;}
       return true
 }
 
+// using promise and return query result
+queryProm = (qString, qParam) => {return new Promise ((resolve, reject)=>{
+    //console.log(qString)
+    cnxSql.query(
+        qString,
+        qParam,
+        (error, data, fields)=>{
+            if(error){
+                console.log(error)
+                return reject(error);
+            }else{
+            return resolve({data, fields});}
+        }
+    );
+});};
 
 async function New_Prod_Line(req, res){
-    //check query fields
+    //check query fieldss
     if (!prodLine_consistency(req, res)){return;}
-  
-    //check user exist and pw is valid (db has no empty userlogin empty)
-    let UserAuth = await cnxSql.cnxSql.query('select Auth form People where Firstname = ?', [req.body.get('FirstName')])
-    console.log(UserAuth)
-    // user dosn't exist
-    if (UserAuth.length = 1){
-    res.status(403).send('user creation failled: user already exist');
+    //check line exist 
+
+    let {data: resLine, fields: fieldsLine} = await queryProm('select count(NoLigne) as resLine from ProdLignes where Site = ? and NoLigne = ?',
+     [req.body['Site'], req.body['NoLigne']])
+     
+    console.log('resline type : ', typeof(resLine))
+    console.log("check line exist", resLine)
+    console.log("check type resLine[0].resLine  : ", typeof(resLine[0].resLine))
+    console.log("check line exist resLine[0].resLine  : ", resLine[0].resLine)
+    console.log(resLine[0].resLine === 0)
+
+    // Line doesn't exist
+    if ( ! (resLine[0].resLine === 0)){
+    res.status(400).statusMessage = 'Line creation aborded: Line already exist'
+    res.end();
     return;}
   
-    //create user
-    let hash = crypto.pbkdf2Sync(req.body.get('Auth'), this.seed, 1000, 64, `sha512`).toString(`hex`); 
-    UserAuth = await cnxSql.cnxSql.query('insert INTO People (FirstName, Auth) values (?,?)', [req.body.get('FirstName'), hash])
-  
-    // generate and return token
-    let UserUuid = uuid.uuidv1().toString('hex')
-    // add token to valid list
-    let Nowdate = Date()
-    Nowdate += (2*60*1000) // add 2 mins
-    validToken.append([hash], [req.body.get('FirstName'), Nowdate] )
-    res.status(200).json({'AuthToken':UserUuid});
+    //create New Line
+    let createdLine = await queryProm('insert INTO ProdLignes (Site, NoLigne, Volume) values (?,?,?)',
+                     [req.body['Site'], req.body['NoLigne'], req.body['Volume']])
+    console.log("New line created",createdLine)
+    res.status(200).statusMessage = 'enjoy your new prod line'
+    res.end();
     return;
-    
   } 
 
 

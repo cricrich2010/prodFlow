@@ -8,26 +8,31 @@ const seed = "Password hash seed";
 let validToken ={}
 
 //req.authenticated
-
+// Check if user is authenticated, and set headers accordingly
 function user_Auth(req, res, next) {
   //has the request an AuthToken
-  if(!req.get('AuthToken')){
-    req.headers['authenticated'] = false;
+  if(!(req.get('AuthToken'))){
+    req['authenticated'] = false;
+    console.log('user_Auth, no token:', res.authenticated)
+
     // req.set('authenticated', false)
     return next();}
   //is token a valid token
-  if (req.get('AuthToken') in validToken.keys()){
+  if (req.get('AuthToken') in validToken){
     if(validToken['AuthToken'][1] > Date()){
-      req.req.headers['authenticated'] = true;
+      req['authenticated'] = true;
+      console.log('user_Auth, valid token:', res.authenticated)
       // req.set('authenticated', true);
       return next();
     }else{
       delete validToken['AuthToken']
-      req.req.headers['authenticated'] = false;
+      req['authenticated'] = false;
+      console.log('user_Auth, token expired:', res.authenticated)
       // req.set('authenticated', false)
       return next();}
   }else{
-    req.req.headers['authenticated'] = false;
+    req['authenticated'] = false;
+    console.log('user_Auth, invalid token:', res.authenticated)
     // req.set('authenticated', false)
     return next();}
 };
@@ -38,32 +43,32 @@ function user_Auth(req, res, next) {
 //   let hash = Crypto.pbkdf2Sync(password, this.seed, 1000, 64, `sha512`).toString(`hex`); 
 //   return this.hash === hash; 
 // }; 
-// check user concistency request
+// check user concistency request, works for all user operation: login, new user, new pass 
 function user_consistency (req, res){
       //check query fields
       console.log(req.body)
       console.log(typeof(req.body))
       console.log(req.body['FirstName'])
       console.log(req.body['Auth'])
-      console.log(req.body['Firstame'])
       console.log(req.body['bidon'])
 
-     
       if (!(req.body['FirstName'] && req.body['Auth'])){
         console.log("fields miss")
-        res.status(403).send('Authentication failled: missing login and/or password');
+        res.status(403).statusMessage = 'Authentication failled: missing login and/or password';
+        res.end()
         return false;}
-      // check empty iser
+      // check empty user
       if (req.body['FirstName'] == ""){
         console.log("empty login")
-        res.status(403).send('Authentication failled: missing login and/or password');
+        res.status(403).statusMessage = 'Authentication failled: missing login and/or password';
+        res.end()
         return false;}
         console.log("user req consistent")
 
         return true
 }
 
-function GeneRetToken(req, res){
+function GenerateToken(req, res){
   // generate and return token
   let UserUuid = uuid.uuidv1().toString('hex')
   // add token to valid list
@@ -86,7 +91,8 @@ async function user_Login(req, res){
   cnxSql.cnxSql.query('select Auth, FirstName from People where FirstName = ?', [req.body['FirstName']], (err, UserAuth) => {
   if (err) {
     console.log(err)
-    res.status(500).send()
+    res.status(500).statusMessage = err
+    res.end()
   }else{
 
     console.log(UserAuth)
@@ -95,7 +101,8 @@ async function user_Login(req, res){
 
     // user dosn't exist
     if (UserAuth.length == 0){
-      res.status(403).send('Authentication failled: missing login and/or password');
+      res.status(403).statusMessage ='Authentication failled: missing login and/or password';
+      res.end
       return;}
     // empty key is always valid -->> this is a student project !!!!
     console.log('UserAuth[0].Auth', UserAuth[0].Auth)
@@ -112,7 +119,8 @@ async function user_Login(req, res){
       res.status(200).json({'AuthToken':UserUuid});
       return;}
     else {
-      res.status(403).send('Authentication failled: wrong login and/or password');
+      res.status(403).statusMessage = 'Authentication failled: wrong login and/or password';
+      res.end()
       return;}}})
     }
 
@@ -125,7 +133,8 @@ async function New_User(req, res){
   console.log(UserAuth)
   // user dosn't exist
   if (UserAuth.length = 1){
-  res.status(403).send('user creation failled: user already exist');
+  res.status(403).statusMessage = 'user creation failled: user already exist';
+  res.end()
   return;}
 
   //create user
@@ -149,7 +158,7 @@ async function New_Passwd(req, res){
   if (!user_consistency(req, res)){return;}
   let hash = "";
   // hash pass if any
-  if (!req.body['Auth']=== ""){ hash = Crypto.pbkdf2Sync(req.body['Auth'], this.seed, 1000, 64, `sha512`).toString(`hex`); }
+  if (!(req.body['Auth']=== "")){ hash = Crypto.pbkdf2Sync(req.body['Auth'], this.seed, 1000, 64, `sha512`).toString(`hex`); }
   // rec new passwd
   let UserAuth = await cnxSql.cnxSql.query('UPDATE People SET Auth = ? where FirstName = ?;', [req.body['FirstName'], hash])
 

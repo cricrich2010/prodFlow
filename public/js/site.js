@@ -34,13 +34,14 @@ function Fetch_Site_Info() {
             document.getElementById('Site_Street').innerText = data[0]['Street'];
             document.getElementById('Site_Size').innerText = "not yet available";
             document.getElementById('Line_site_header').innerText = data[0]['City'];
-            document.getElementById('TheImage').remove()
-            let TheImage = document.createElement('img')
-            TheImage.src = "https://picsum.photos/200/300?random=" + 
+            //document.getElementById('TheImage').remove()
+            // let TheImage = document.createElement('img')
+            // TheImage.src = "https://picsum.photos/200/300?random=" + 
+            // (Math.floor(Math.random() * (20 - 1) + 1 ))
+            // TheImage.id = "TheImage"
+            // document.getElementById('imgsite').appendChild(TheImage)
+            document.getElementById('TheImage').src = "https://picsum.photos/300/200?random=" + 
             (Math.floor(Math.random() * (20 - 1) + 1 ))
-            TheImage.id = "TheImage"
-            document.getElementById('imgsite').appendChild(TheImage)
-
 
 
         });
@@ -51,7 +52,7 @@ function Fetch_Site_Info() {
 function Fetch_Site_prodLines() {
     let CB_Sites = document.getElementById('CB_SiteList');
     console.log("fetch prodLines for ", CB_Sites.value)
-    fetch('/site/info_lines?Site=' + CB_Sites.value).then((resp) => { console.log(resp); return resp.json() })
+    fetch('/site/info_lignes?Site=' + CB_Sites.value).then((resp) => { console.log(resp); return resp.json() })
         .then((data) => {
             //console.log(data);
             let tb_SiteLigne = document.getElementById('sitelinetable');
@@ -69,7 +70,6 @@ function Fetch_Site_prodLines() {
             SitesL = `<tbody>${SitesL}</tbody>`
             tb_SiteLigne.innerHTML = htmlStrH + SitesL;
             //tb_SiteLigne.appendChild(sTable)
-            Fetch_Site_incidents()
         });
 }
 
@@ -89,7 +89,7 @@ function Fetch_Site_incidents() {
             }
         })
         .then((data) => {
-            console.log(data);
+            console.log('Fetch_Site_incidents data:',data);
             let tb_SiteLigne = document.getElementById('LigneIncidentsTable');
             if (response.headers.get('NbResults') === "0") {
                 tb_SiteLigne.innerHTML = '<p style="color:green;">No incident reported</p>';
@@ -178,15 +178,15 @@ function LoginSendCC(){
             response.json()
         }})
     .then((data) => {
-        console.log(data);
+        console.log("login token:",data);
         
         this.AuthToken = data.AuthToken
         })
 }
 
 function New_prodLines(){
-    let Site = document.getElementById('CB_SiteList');
-    let NoLigne = document.getElementById('Line_site_header').value + document.getElementById('TB_lineID').value
+    let Site = document.getElementById('CB_SiteList').value;
+    let NoLigne = document.getElementById('Line_site_header').innerText + document.getElementById('TB_lineID').value
     let Volume = document.getElementById('TB_Volume').value
 
     
@@ -194,20 +194,22 @@ function New_prodLines(){
     {
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'AuthToken': this.AuthToken
         },
         method: "POST",
         body: JSON.stringify({ 'Site': Site, 'NoLigne': NoLigne, 'Volume': Number(Volume) })
     }
     fetch('/New_Line', qoptions) 
     .then((response) => {
-        if (!response.ok){
+        if (!(response.ok)){
             alert(response.statusText )
         }else{
             response.json()
+            Fetch_Site_prodLines()
         }})
     .then((data) => {
-        console.log(data);
+        console.log('New Line (json) data (should be empty) : ', data);
         
         this.AuthToken = data.AuthToken
         })
